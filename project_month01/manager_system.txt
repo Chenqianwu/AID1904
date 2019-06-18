@@ -1,0 +1,41 @@
+一.软件开发大致流程:
+1.	产品经理:将用户的需求,写成产品规格说明文档.
+2.	程序员:
+需求分析 --> 架构设计(概要设计/详细设计)-->编码 -->单元(类/函数)测试
+3.	测试员:
+自动化测试
+4.	上线/维护
+
+二.定义manager_system.py文件,完成下列任务.
+-----------StudentManagerController------
+练习1:
+	数据模型类：StudentModel
+		数据：编号 id,姓名 name,年龄 age,成绩 score
+    逻辑控制类：StudentManagerController
+		数据：学生列表 __stu_list
+		行为：获取列表 stu_list,添加学生 add_student，
+              生成编号:最后一个学生编号+1
+练习2:
+    删除学生remove_student
+
+练习3:
+    修改学生update_student
+    根据编号,修改其余信息.
+
+-----------StudentManagerView------
+练习4:
+    1. 将teacher的View代码复制粘贴过来.
+    2. 实现下列功能:
+        输入学生__input_student
+        显示所有学生__output_students
+
+练习5:
+    删除学生__delete_student
+
+
+
+
+
+
+
+
