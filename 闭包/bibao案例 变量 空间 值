@@ -1,0 +1,124 @@
+# def func(a, b):
+#     def line(x):
+#         return a * x - b
+#
+#     return line
+#
+#
+# line = func(2, 3)
+# print(line(5))
+#在这个案例中，外函数func有接收参数 a=2，b=3，内函数line接收参数x=5，
+# 在内函数体中计算了a*x-b 即 2×5-3的值作为返回值，外函数返回内函数的引用，
+# 这里的引用指的是内函数line在内存中的起始地址，最终调用内函数line()得到返回值7
+
+
+# def func(a, b):
+#     def line(x):
+#         nonlocal a
+#         a = 3
+#         return a * x - b
+#
+#     return line
+#
+#
+# line = func(2, 3)
+# print(line(5))
+
+# def mul():
+#     return [lambda x : i*x for i in range(4)]
+#
+# print([m(2) for m in mul()])
+
+# def foo1(n):
+#     def foo2(m):
+#         return n + m
+#     return foo2
+#
+# a = foo1(2)
+# print(a(3))
+#
+# def foo1():
+#     var = 'hello'
+#     def foo2():
+#         print(var)
+#     return foo2
+# a = foo1()
+# a()
+#
+# def mul():
+#     func_list = []
+#     for i in range(4):
+#         def lam(x):
+#             return x*i
+#         func_list.append(lam)
+#     return func_list
+#
+# print([m(2) for m in mul()])
+
+# 闭包定义：
+# 1、闭包是一个嵌套函数
+# 2、闭包必须返回嵌套函数
+# 3、嵌套函数必须引用一个外部的非全局的局部自由变量
+"""
+闭包：
+　   在一个外函数中定义了一个内函数，内函数里运用了外函数的临时变量，并且外函数的返回值
+是内函数的引用。这样就构成了一个闭包。
+    一般情况下，在我们认知当中，如果一个函数结束，函数的内部所有东西都会释放掉，还给内存，
+局部变量都会消失。但是闭包是一种特殊情况，如果外函数在结束的时候发现有自己的临时变量将来会
+在内部函数中用到，就把这个临时变量绑定给了内部函数，然后自己再结束。
+"""
+
+
+案例：
+ #闭包函数的实例
+ # outer是外部函数 a和b都是外函数的临时变量
+ def outer( a ):
+     b = 10
+     # inner是内函数
+     def inner():
+         #在内函数中 用到了外函数的临时变量
+         print(a+b)
+     # 外函数的返回值是内函数的引用
+     return inner
+ 
+ if __name__ == '__main__':
+     # 在这里我们调用外函数传入参数5
+     #此时外函数两个临时变量 a是5 b是10 ，并创建了内函数，然后把内函数的引用返回存给了demo
+     # 外函数结束的时候发现内部函数将会用到自己的临时变量，这两个临时变量就不会释放，会绑定给这个内部函数
+     demo = outer(5)
+     # 我们调用内部函数，看一看内部函数是不是能使用外部函数的临时变量
+     # demo存了外函数的返回值，也就是inner函数的引用，这里相当于执行inner函数
+     demo() # 15
+     demo2 = outer(7)
+     demo2()#17
+#############对于闭包，在外函数outer中 最后return inner，我们在调用外函数 demo = outer() 的时候，outer返回了inner，inner是一个函数的引用，这个引用被存入了demo中。所以接下来我们再进行demo() 的时候，相当于运行了inner函数。
+
+
+def multiples():
+    return [lambda x : i*x for i in range(4)]
+print([m(2) for m in  multiples()])
+
+
+def mul():
+    list_=[]
+    for i in range(4):
+        def lam(x):
+            return x*i
+#相对而言局部变量绑定的是值，非局部变量绑定的是空间， 而不是值本身，所以，for循环生成的i，
+# 相对于函数lam来说，是全局变量，所以绑定的是i所在的内存地址，但i最后变成了3，lam绑定的
+# 是3。
+        list_.append(lam)
+    return list_
+print([m(2) for m in  mul()])
+
+def mul():
+    list_=[]
+    for i in range(4):
+        def lam(x,n=i):
+            #这时候因为 n 是局部变量，所以绑定的是 n 的值
+            return x*n
+        list_.append(lam)
+    return list_
+print([m(2) for m in mul()])
+
+
