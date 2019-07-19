@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>主页</title>
+</head>
+<body>
+    {% if request.session and request.session.userinfo %}
+    欢迎:{{ request.session.userinfo }}
+    <a href="/user/logout">注销</a>
+    {% else %}
+    <a href="/user/login">登录</a>
+    <a href="/user/reg">注册</a>
+    {% endif %}
+</body>
+</html>
