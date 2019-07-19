@@ -1,0 +1,434 @@
+
+Django 知识点回顾
+  路由，视图，模板，模型
+
+路由用来确定网络服务的地址
+  url(正则表达式, 视图函数的地址)
+    url(r'^user/login$', views.login)
+  url(正则表达式, include(子路由的模块地址))
+    url(r'^bookstore/', include('bookstore.urls'))
+       /bookstore/add
+  url(正则表达式， 视图函数的地址, name='别名')  反向解析
+     url(r'/user/login$', views.login, name='login')
+    模板: login.html
+       {% url login %}   代替 /user/login
+
+视图 view
+   用于接收请求并做出响应的函数
+
+    视图函数的语法:
+       def myview(request, ....其它参数):
+           1. 根据模型来查询，添加，修改数据库
+              books = models.Book.objects.all()
+           2. 生成一个html文档(调用模板)
+              result = render(request, 'xxx.html', local())
+           要求返回HttpResponse对象
+              return result
+    视图函数的返回值
+       return HttpResponse('xxx')
+       return render(request, 'xxx.html', locals())
+       return HttpResponseRedirect('/user/login')
+       return redirect('user/login')
+       raise Http404  # 报404错误
+    
+    def date(request, year, month, day):
+        ....
+
+    file : urls.py
+       urlpattern = [
+           url(r'^date/(\d{4})/(\d{1,2})/(\d{1,2})',
+               views.data)
+       ]
+    路由:
+       /date/2019/7/4
+
+    file : urls.py
+       urlpattern = [
+           url(r'^date/(?P<year>\(?P<month>d{4})/(?P<day>\d{1,2})/(\d{1,2})',
+               views.data)
+       ]
+
+请求:
+   request, 用来记录浏览器端给服务器端的信息
+     请求的方式:
+        HTTP 1.0 中： GET, POST, HEAD
+        HTTP 1.1 中： PUT, DELETE, CONNECT, OPTIONS
+                    TRACE
+      request对象的属性
+        request.path  显示路由信息
+        request.path_info  显示路由信息的字符串
+        request.method  字符串，用来判断请求方式
+        request.GET  获取GET请求的数据信息
+        request.POST  获取POST(表单/AJAX) 数据信息
+        request.COOKIES  字典，内部键值对形式的cookies 信息
+        request.session  类字典类型，存储当前会话的信息
+        ....
+
+响应:
+   response, 用来记录服务器端传递给浏览器端返回的信息
+
+   HTTP响应状态码
+      200 OK 没错
+      1xx  服务 器收到请求，需要再次执行相应的操作
+      2xx  成功
+      3xx  重定向
+      4xx  客户端错误
+      5xx  服务器错误
+
+GET方式传参
+   /book?page=1&perpage=10
+      perpage 每个记录个数
+      page  当前是哪儿一页
+    if request.method == 'GET':
+        page = request.GET['page']
+        perpage = request.GET.get('perpage', 10)
+
+MVC
+   M 模型(Model) 主要用于数据库的封装(ORM)
+   V 视图(相当于MTV中的模板)用于向用户展示结果
+   C 控制器(相当于MTV中的视图), 用于处理业务逻辑
+作用:
+  降低软件开发的复杂程序，提高程序的可维护性
+
+MTV
+  M  模型
+  T  模板
+  V  视图
+
+模板
+   就是一个html 内部有自己的语法
+      {{ 变量 }}
+    if 标签
+      {% if 条件 %}
+      {% elif 条件 %}
+      {% elif 条件 %}
+      {% else %}
+      {% endif %}
+    for 标签
+        {% for 变量 in 可迭代对象 %}
+          ...
+        {% empty %}
+          ...
+        {% endfor %}
+    cycle 标签
+      {% cycle '值1', '值2', ....}
+      主要用于循环中
+    comment 标签，用于注册 
+    过滤器
+      {{ value | upper | 过滤器2 }}
+    escpe 转义
+      <  &lt;
+      >  &gt;
+      '  &#39;
+      "  &quot;
+      &   &amp;
+   模板 继承
+      file : a.html
+          <html>
+             <title>......
+             <body>
+               {% block 块名 %}
+                  <h1>aaaa</h1>
+               {% endblock %}
+             </body>
+          </html>
+      file : b.html
+          {% extends 'a.html' %}
+          {% block 块名 %}
+              <h2>bbbb</h1>
+          {% endblock %}
+
+    {% url '别名' %}  根据别名来确认URL字符串
+    url(^'^user/login', xxx.view, name='login')
+    <a href="/user/login">登陆</a>
+    <a href="{% url 'login' %}">登陆</a>
+
+    url(r'^date/(\d{4})/(\d{1,2})/(\d{1,2})',
+        views.abc, name='birthday')
+      /date/2008/1/8
+      {% url 'birthday' '2008' '1' '8' %}
+
+创建APP  应用
+   python3 manage.py startapp 应用的名称
+      views.py  视图处理函数
+      urls.py   子路处理模块
+      models.py  存入模型类
+      admin.py    用于 '127.0.0.1:8000/admin' 后台管理
+      __init__.py 包内部必须存在的文件
+      templates/  自定义文件夹用来存放当前应的模板
+    注册应用:
+      INSTALLED_APP = [
+        ....
+        '应用的名称',
+      ]
+模型 
+   ORM  
+      Object Ralationship Mapping
+      用类来描述数据表，用对象来代表某一条记录
+    作用:
+       屏蔽减少直接操作SQL语句,提高代码的可维护性
+
+class Book(models.Model):
+    bookname = models.CharField(max_length=20)
+    ....
+
+    字段类型 :
+       BooleanField
+       CharField
+       DateField
+       DatetimeField
+       IntegerField
+       FloatField
+       DecimalField
+       ...
+    title = CharField(null=True,
+                     default="",
+                     db_index=True,
+                     unique=True,
+                     db_column='mytitle')
+
+django shell 的启动
+   $ python3 manage.py shell
+
+
+模型的操作:
+  创建数据对象
+     # 1.
+     abook = models.Book.objects.create(....)
+     # 2.
+     abook = models.Book()
+     abook.title = 'xxx'
+     abook.save()
+  查看数据对象
+    models.Book.objects.all()  # 查询所有
+    models.Book.objects.get(id=1)  # 查找一条记录
+    models.Book.objects.filter(id__gt=3)
+    models.Book.objects.exclude(id=1)
+  修改数据对象
+    # 1.
+    abook = models.Book.objects.get(id=1)
+    abook.title = 'C++'
+    abook.save()
+    # 2.
+    books = models.Book.objects.all()
+    books.update(pub='清华大学出版社')
+  删除数据对象
+    abook.delete()
+    books.delete() 删除查询集合中的全部数据
+
+不带分组的聚合
+  Sum, Avg, Count, Max, Min
+  models.Book.objects.aggregate(myAvg=Avg('price'))
+
+ 带分组的取合
+   查询集合.anotate(myCount=Count('pub'))
+
+F 对象和 Q对象
+  F 对象 代表某个字段当前值的操作
+  books = models.Book.objects.filter(
+    market_price__gt=F('price'))
+  
+  Q 对象
+    用于 或|, 与&, 非~
+    models.Book.objects.filter(
+         Q(title__contains ='python') |
+         Q(pub__contains='清华')
+
+原生数据库操作方法:
+  1.  查询
+  books = Book.objects.raw('select * from book;')
+  2. 其它
+    from django.db import connection
+    with connection.cursor() as mycur:
+       mycur.excute('delete from book where id=1')
+
+数据库后台管理
+  127.0.0.1:8000/admin
+
+   创建管理用户
+    python3 manage.py createsuperuser
+    实质是在 auth_user 表中创建一条记录
+
+  需要在admin.py 中 注册自定义的模型类:
+     from django.contrib import admin
+
+     admin.site.register(models.Book, 模型管理器类)
+
+数据表的关联关系的映射
+  一对一
+    class Author:
+        ...
+    class wife:
+       author = models.OneToOneField()
+  一对多
+      class A:
+        ...
+      class B:
+         xxx = models.ForeignKey(A)
+  多对多
+      class A:
+         ...
+      class B:
+          xxx = models.ManyToManyField(A)
+
+cookie 和 session
+
+cookie 是存于浏览器一段小空间,用于存储少量数据
+  http 协议是无状态的协议
+    
+session 是存于服务器端的数据
+  要求浏览器的cookie功能不能关闭,因为cookie要存sessionid
+    sessionid 
+
+中间件
+  hook(钩子)
+  class MyMiddleware(MiddlewareMixin):
+      def process_request(self, request):
+          ....
+      def process_view(self, request, callback
+          callback_args, callback_kwargs):
+          ...
+      def ... 
+  作用:
+    统计访问次数数据
+    权限管理
+    反爬虫
+    ...
+
+CSRF 
+  表单中要加
+  {% csrf_token %}
+
+form 模块
+  作用:
+    1. 用类来生成一个表单
+    2. 表单验证
+生成一个表单
+  class XXX(forms.Form):
+      name = forms.CharField(label='姓名')
+  xxx = XXX()
+  xxx.as_p() 返回
+    <label>姓名</label>
+    <input type='text' name='name'>
+表单验证:
+   myxxx = XXX(request.POST)
+   if myxxx.is_valide():
+      n = myxxx.cleaned_data['name']
+
+  class XXX(forms.Form):
+      name = forms.CharField(label='姓名')
+      pwd1 = forms.CharField(label='密码1')
+      pwd2 = forms.CharField(label='密码2')
+
+      def clean_name(self):
+          if 如果self.name 不合法：
+              raise forms.ValidationError
+          else:
+             return self.cleaned_data['name']
+      def clean_pwd1(self):
+          if self.cleaned_data['pwd1'] == '':
+              raise forms.ValidationError
+          return self.cleaned_data['pwd1']
+
+      def clean(self):
+          '''整体表单验证'''
+          if self.cleaned_data['pwd1'] != \
+             self.cleaned_data['pwd2']:
+             raise forms.ValidationError
+          return self.cleaned_data
+
+分页 Paginator
+  作用:
+    将大量的数据结果集进行部分显示
+    paginator = Paginator(查询结果集, 每页个数)
+    page = paginator.page(第几页数据)
+    
+    {% for p in page %}
+       {{ p }}  # p为查询结果集中的每一项数据
+    {% endfor %}
+文件上传
+  表单:
+    <form method='post' action='...'
+        enctype='multipart/form=data'>
+      <input type='file' name='myfile'>
+    </form>
+  服务器端:
+    def myview(request):
+        request.FILES['myfile']  # 获取上传的文件数据
+
+项目的部署
+  WSGI(web server gateway interface)
+    python manage.py runserver  # 调式启动
+  uwsgi  是WSGI的一个实现方式，专用于 django,flask等
+  配置步骤（略)
+
+nginx
+  负载均衡
+  反射代理
+
+
+
+
+练习:
+  一对多案例, 实现网络云笔记
+    功能:
+      应用 user 实现如下功能
+        注册
+        登陆
+        退出登陆
+      应用 note 实现如下功能:
+        发表笔记
+        显示笔记列表
+        修改笔记
+        删除笔记
+   项目名称:  mycloud_notebook
+      django-admin startproject mycloud_notebook
+      cd mycloud_notebook
+   创建两个app:
+      python3 manage.py startapp note
+      python3 manage.py startapp user
+   在settings.py 中注册两个应用
+      添加子路由
+        添在 user/urls.py 写入子路由的内容
+           from django.conf.urls import url
+           urlpatterns = []
+        添加 note/urls.py 写入子路由的内容(同上)          
+      将子路由添加到主路由mycloud_notebook/urls.py中        
+
+      在主路由中加入主页，对应视图函数views.index
+         在主包文件内添加一个views.py 写入
+            def index(request):
+
+    添加模板文件夹
+      mycloud_notebook/templates
+      note/templates/note
+      user/templates/user
+    在 settings.py 添加模板文件夹
+    在 mycloud_notebook/templates创建 index.html
+      写入主页的模板文件
+    
+    添加模型类
+      user/models.py 里:
+        class User(models.Model)
+      note/models.py 里:
+        class Note(models.Model)
+    数据库名：　mynote
+       create database mynote default charset utf8;
+    修改settings.py 
+    　　　加入数据库支持
+    修改 __init__.py 
+       加入:
+         import pymysql
+         pymysql.install_as_MySQLdb()
+
+    做迁移操作
+      ...
+
+  注册功能暂不实现
+    用 后台管理直接操作User表添加
+    python3 manage.py createsuperuser
+  
+  在note/admin.py 加入Note模型的支持
+  在user/admin.py 加入User模型的支持
+
+  http://127.0.0.1:8000/note/new
