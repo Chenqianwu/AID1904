@@ -1,0 +1,281 @@
+赵旭
+zhaoxu@tedu.cn
+
+
+回顾
+1.数据库
+	存储数据的仓库
+	MYSQL,Oracle,
+2.MYSQL特点
+	1.关系型数据库
+	2.跨平台
+	3.支持多款编程语言(python,java,php,.... ....)
+	4.基于磁盘存储,数据是以文件的形式保存在 /var/lib/mysql
+3.启动服务
+	1. sudo /etc/init.d/mysql start|stop|restart|status
+	2. sudo service mysql start|stop|restart|status
+
+	客户端链接: Navicat for MySQL
+		mysql -hIP地址 -u用户名 -p密码 数据库
+		本地连接可省略 -h
+4.基本的SQL命令
+	1.库管理
+		1.创建数据库
+			1.create database 库名 [charset=utf8]
+			2.create database 库名 default charset utf8 collate utf8_general_ci;
+		2.查看已有数据库
+			show databases;
+		3.查看创建库的语句
+			show create database
+		4.切换库
+			use 库名
+		5.删除库
+			drop database 库名
+	2.表管理
+		1.创建表
+			create table 表名(
+				字段名 数据类型 字段说明,
+				字段名 数据类型 字段说明,
+			)
+		2.查看表结构
+			desc 表名
+		3.修改表结构
+			alter table 表名 .... ....
+		4.删除表
+			drop table 表名
+	3.表记录管理
+		1.增加 - Create
+			1. 向所有列中插入数据
+				insert into 表名 values(值1,值2,...),(值1,值2,...)
+			2. 向部分列中插入数据
+				insert into 表名(字段1,字段2,...)
+				values
+				(值1,值2,...)
+		2.查询 - Retrieve
+			1.select 字段名 from 表名
+			2.select 字段名 from 表名 where 条件
+				1. >,<,>=,<=,=,!=
+				2. in,not in
+				3. not , and , or
+				4. between ... and ...
+				5. 模糊查询 % , _ ,
+			3.select 字段名 from 表名
+			  where 条件
+				order by 字段名 [desc] , 字段名 [desc]
+			4.select 字段名 from 表名
+				where 条件
+				order by 字段
+				limit offset,num
+
+				e.g. 分页
+					条件:
+						1.当前要看第多少页
+						2.每页显示多少条数据
+
+					set @current=5,@pageSize=2
+
+					select id,name,age,email
+					from users
+					limit (@current-1)*@pageSize,@pageSize
+			5.联合查询
+				select 列1,列2,...
+				from 表名 where 条件
+				union [ALL|DISTINCT]
+				select 列1,列2,...
+				from 表名 where 条件
+			6.正则匹配
+				select * from 表名 where 字段 regexp '...'
+		3.更新 - Update
+			update 表名 set 字段=值,字段=值
+			where 条件
+		4.删除 - Delete
+			delete from 表名 
+			where 条件
+5.数据类型
+	1.数字
+		int,bigint,tinyint,float,decimal
+	2.字符串
+		varchar,text,longtext
+	3.日期和时间
+		date,datetime
+
+
+====================================================
+练习:
+	1.创建数据库:country,编码为utf8,排序校对:utf8_general_ci;
+
+		create database country default charset utf8 collate utf8_general_ci;
+
+		use country;
+
+	2.创建表 sanguo(id,name,attack,defense,gender,country)
+		create table sanguo(
+			id int primary key auto_increment,
+			name varchar(32) not null,
+			attack int,
+			defense int,
+			gender char(2),
+			country varchar(32)
+		);
+	3.插入5条记录
+		诸葛亮,司马懿,貂蝉,张飞,赵云 
+		攻击(attack > 100) , 防御(defense < 100)
+	4.查询所有"蜀国"人的信息
+		select * from sanguo where country='蜀国';
+	5.将"赵云"的攻击力设置为360,防御力设置为68
+		update sanguo set attack=360,defense=68 where name='赵云';
+	6.将"吴国"英雄中攻击值为110的英雄的攻击值改为100,防御改为60
+		update sanguo set attack=100,defense=60 where country='吴国' and attack=110
+	7.找出攻击值高于200的蜀国的英雄的名字和攻击力
+		select name,attack from sanguo
+		where attack>200 and country='蜀国';
+	8.将蜀国英雄按照攻击力从高到低排序
+		select * from sanguo where country='蜀国' order by attack desc;
+	9.魏蜀两国英雄中名字为三个字的按防御值升序排序
+		1.select * from sanguo where (country='魏国' or country='蜀国') and name like '___' order by defense;
+
+		2.select * from sanguo where country in ('魏国','蜀国') and name like '___' order by defense;
+	10.在蜀国英雄中,查找攻击值前三名且名字不为null的姓名,攻击值和国家
+		select name,attack,country from sanguo where country='蜀国' and name is not null order by attack desc limit 3;
+====================================================
+1.MYSQL普通查询
+	1.聚合函数 (聚合查询)
+		函数名             功能
+		avg(字段名)        求指定字段的平均值
+		max(字段名)        求指定字段的最大值
+		min(字段名)        求指定字段的最小值
+		sum(字段名)        求指定字段的记录和
+		count(字段名)      求指定字段的记录的个数
+
+		1.聚合函数使用语法
+			select 聚合函数1,聚合函数2 from 表名
+
+			e.g. 1:找出sanguo表中最大的攻击力值是多少
+				select max(attack) from sanguo
+			e.g. 2:表中共有多少个英雄
+				select count(*) from sanguo;
+			e.g. 3:找出sanguo表中最低的防御力值是多少
+				select min(defense) from sanguo;
+			e.g. 4:蜀国英雄中攻击值大于200的英雄的数量
+				select count(attack) from sanguo where country='蜀国' and attack>200;
+		2.注意
+			select name,max(attack) from sanguo;
+
+			聚合函数在默认情况下是不能与其他列一起做查询的
+		3.分组查询 + 聚合查询
+			e.g. 求sanguo表中每个国家的总攻击力是多少
+			分组:分组列,值相同的数据会被划分到一组
+			语法:
+				select 分组列,聚合函数(列)
+				from 表
+				where 条件
+				group by 分组列,...
+				order by ... 
+				limit ...
+
+			e.g. 求sanguo表中每个国家的总攻击力是多少
+			select country,sum(attack) from sanguo group by country;
+
+			练习:
+				1.计算每个国家的总攻击力,平均攻击力,总防御力和平均防御力
+				select country,sum(attack),avg(attack),sum(defense),avg(defense) 
+				from sanguo 
+				group by country
+				2.所有国家的男英雄中,英雄数量最多的前2名国家名称以及英雄数量
+				select country,count(id) 
+				from sanguo
+				where gender='M'
+				group by country
+				order by count(id) desc
+				limit 2
+		4.分组筛选 - having
+			e.g 查询出平均攻击力大于105的国家名称
+			作用:分组后做组内筛选,配合着group by 联用
+			语法:
+				select xxxx
+				from xxx
+				where xxxx
+				group by xxx
+				having 条件
+				order by xxx
+				limit xxx
+			e.g 查询出平均攻击力大于105的国家名称
+				select country,avg(attack) as avAtt
+				from sanguo
+				group by country
+				having avAtt > 105
+	2.distinct函数
+		作用:去重
+		语法:
+			select distinct(列) from 表
+		e.g. 查询 sanguo 表中共有多少个国家
+	3.查询表记录时做数学运算
+		运算符:+,-,*,/,%
+		e.g. 1: 查询时显示攻击力翻倍
+			select attack * 2 from sanguo;
+		e.g. 2: 更新蜀国所有的英雄攻击力 * 2
+			update sanguo set attack = attack * 2
+			where country = '蜀国'
+		e.g. 3: 查询攻击力+100之后大于200的英雄的姓名和国家
+			select name,country 
+			from sanguo
+			where attack + 100 > 200
+2.索引
+	1.什么是索引
+		对数据库表的一列或多列的值进行排序的一种结构
+	2.优点
+		加快数据的检索速度
+	3.缺点
+		1.占用物理存储空间
+		2.对表中数据进行更新时,索引也会动态维护,会降低维护速度
+	4.索引比对手段
+		1.查询系统时间
+		2.执行查询
+		3.查看系统时间
+
+		在 某列 上创建索引
+		1.查询系统时间
+		2.执行查询
+		3.查看系统时间
+
+	5.索引的分类
+		1.主键索引
+			1.特点:增加主键之后,主键列自动会被增加索引
+			2.增加主键[索引]
+				1.已有表添加主键
+					alter table 表名 add primary key(id);
+		2.唯一索引
+			1.特点
+				1.可以有多个
+				2.唯一索引所在的列的值必须唯一
+			2.实施手段
+				1.创建表的时候指定唯一性
+					create table xxx(
+						id int primary key auto_increment,
+						phone varchar(20) unique,
+					)
+				2.对已有表创建索引
+					create unique index 索引名 on 表名(字段名);
+		3.普通索引
+			1.实施手段
+				1.创建表同时指定普通索引
+					create table 表名(
+						id xxx xxxx,
+						country varchar(30) ,
+						index(country),
+						index(字段名),
+					)
+				2.对已有表增加普通索引
+					create index 索引名 on 表名(字段名);
+
+	6.取消索引
+		drop index 索引名称 on 表名
+	7.查询索引
+		show index from 表名
+		
+CREATE TABLE XXX(
+	ID XXX,
+	EMAIL varchar(30) unique
+)
+
+
