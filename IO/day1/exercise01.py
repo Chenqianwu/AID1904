@@ -1,0 +1,8 @@
+# 1. 文件函数使用熟练 (open,read,write)
+fd=open('text','r+')
+fd.write("hello world")
+# fd.flush()
+fd.seek(0)
+data=fd.read()
+print(data)
+fd.close()
