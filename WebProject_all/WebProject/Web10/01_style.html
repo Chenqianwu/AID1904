@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="jquery-1.11.3.js"></script>
+    <style>
+        #d1{
+            color:red;
+        }
+        .c1{
+            background:green;
+        }
+        .c2{
+            text-align:center;
+        }
+    </style>
+    <script>
+        window.onload = function (){
+            //1.操作id/class属性对应选择器样式
+            $("h1").attr("id","d1").attr("class","c1")
+            .attr("class","c1 c2");
+            //2.直接操作class属性值
+            $("div").addClass("c1").addClass("c2")
+            .removeClass("c1");
+            //toggleClass()借助用户行为切换类名,有则删除,无则添加
+            btn.onclick = function (){
+                $("div").toggleClass("c1 c2");
+            };
+            //3.操作行内样式
+            $("div").css("width","200px");
+            $("div").css({
+                "height":"200px",
+                "border":"1px solid blue"
+            });
+            $("div").css("height","300px");
+        };
+    </script>
+</head>
+<body>
+    <h1>样式设置</h1>
+    <div>直接修改类名</div>
+    <button id="btn">切换</button>
+</body>
+</html>
